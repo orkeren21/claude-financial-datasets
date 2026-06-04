@@ -1,0 +1,19 @@
+{
+  "name": "financial-datasets",
+  "description": "Call the Financial Datasets API directly for stock prices, fundamentals, SEC filings, earnings, insider trades, institutional holdings, KPIs, macro rates, and stock screening — with parallel batch calls.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Or Keren"
+  },
+  "license": "MIT",
+  "keywords": [
+    "financial-datasets",
+    "stocks",
+    "fundamentals",
+    "sec-filings",
+    "market-data",
+    "finance"
+  ],
+  "skills": "./skills/",
+  "commands": "./commands/"
+}

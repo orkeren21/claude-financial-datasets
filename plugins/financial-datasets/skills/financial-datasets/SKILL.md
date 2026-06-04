@@ -1,0 +1,104 @@
+---
+name: financial-datasets
+description: >-
+  Call the Financial Datasets API directly for real, current data on public
+  companies. Use this whenever the user asks about stock prices or price history,
+  company fundamentals or financials (income statement, balance sheet, cash flow —
+  including as-reported and segmented), financial metrics and ratios, valuation
+  inputs, earnings (results, estimates, surprises), SEC filings (10-K, 10-Q, 8-K)
+  and their sections, insider trades (Form 4), institutional holdings (13F),
+  index/ETF holdings, company facts, KPIs and management guidance, financial news,
+  macro interest rates, or wants to screen or filter stocks by financial criteria —
+  even when they don't name "Financial Datasets" or any API. Prefer this over the
+  Financial Datasets MCP server: it fans out many requests in parallel and lets you
+  post-process the JSON freely. Needs a one-time API key setup (/fds-setup).
+---
+
+# Financial Datasets API
+
+Direct access to the [Financial Datasets API](https://docs.financialdatasets.ai)
+(`https://api.financialdatasets.ai`) for fundamentals, prices, filings, and more.
+Everything goes through one script — `scripts/fds.py` — which handles auth,
+retries, and concurrent batches. No third-party packages are required.
+
+Paths below are relative to this skill's directory. If your shell is elsewhere,
+use the absolute path to `scripts/fds.py` (the directory holding this SKILL.md).
+
+## First: make sure a key is configured
+
+The API is keyed and metered. `fds.py` finds the key automatically from (in
+order) the `FINANCIAL_DATASETS_API_KEY` env var, `~/.claude/settings.json`'s
+`env` block, or `~/.financial-datasets/config.json`. If a call comes back with
+an error about a missing key, run setup once and continue:
+
+```
+python scripts/setup_key.py "THE_USERS_KEY"
+```
+
+This stores the key in `~/.claude/settings.json` (which Claude Code, Claude
+Desktop, and Cowork all read) and verifies it with a test call. Ask the user for
+their key if you don't have it; never write a key into a repo or echo it back.
+
+## Making calls
+
+**Single GET** — every endpoint parameter is just a `--flag`:
+
+```
+python fds.py /prices/snapshot --ticker AAPL
+python fds.py /financials/income-statements --ticker MSFT --period annual --limit 4
+python fds.py /prices --ticker NVDA --interval day --start_date 2024-01-01 --end_date 2024-03-31
+```
+
+**POST endpoints** (`/financials/search/screener`, `/financials/search/line-items`)
+take a JSON body; the method is auto-detected:
+
+```
+python fds.py /financials/search/screener --json '{"period":"ttm","limit":10,"filters":[{"field":"revenue","operator":"gt","value":100000000000}]}'
+```
+
+Each call prints `{"ok": ..., "status": ..., "data" | "error": ...}`. On failure
+the `error` is a plain-English message (bad key, exhausted credit, unknown
+ticker, etc.), and the exit code is non-zero.
+
+## Fan out in parallel — this is the point
+
+When a request spans **multiple tickers, statements, or periods**, don't make
+serial calls. Send a JSON array to batch mode and they run concurrently:
+
+```
+echo '[
+  {"path":"/financials/income-statements","params":{"ticker":"MSFT","period":"annual","limit":3},"label":"MSFT"},
+  {"path":"/financials/income-statements","params":{"ticker":"GOOGL","period":"annual","limit":3},"label":"GOOGL"},
+  {"path":"/financials/income-statements","params":{"ticker":"AMZN","period":"annual","limit":3},"label":"AMZN"}
+]' | python fds.py --batch - --concurrency 5
+```
+
+Output is an array of results in input order, each tagged with its `label`.
+Reach for batch mode for peer comparisons, portfolio sweeps, and any
+"compare/across/each of these" request.
+
+## Discovering the surface
+
+There are 49 endpoints. Don't guess — look them up:
+
+- `python fds.py --list <substring>` — list matching endpoint paths.
+- `python fds.py --describe /some/path` — show an endpoint's exact parameters.
+- `references/endpoints.md` — the full catalog (all endpoints, parameters, and
+  examples), grouped by category with a table of contents. Read it when you need
+  a parameter you don't know or want to confirm a path.
+
+## Spend the credit deliberately
+
+The user's balance is finite. Be economical:
+
+- Pull only what the question needs; prefer `limit` to bound results.
+- Use `snapshot` endpoints (`/prices/snapshot`, `/financial-metrics/snapshot`)
+  for "current" values instead of fetching full history.
+- Don't re-request data you already have in the conversation.
+- Batch related calls rather than looping one ticker at a time.
+
+## Presenting results
+
+Parse the JSON and answer the actual question — a clean table or a few numbers,
+not a raw dump. Include the period/date and ticker so figures are unambiguous,
+and note when data is missing rather than inventing it.
