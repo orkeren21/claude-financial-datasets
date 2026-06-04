@@ -44,9 +44,11 @@ Just ask. For example:
 - "Compare revenue and net margin for MSFT, GOOGL, and AMZN over the last 3 years."
 - "Show NVDA's recent insider trades and its latest 10-K."
 
-Under the hood the skill calls `scripts/fds.py`. You can also run it directly:
+Under the hood the skill calls `scripts/fds.py`. You can also run it directly
+(from the skill's `scripts/` directory):
 
 ```
+cd plugins/financial-datasets/skills/financial-datasets/scripts
 python fds.py /prices/snapshot --ticker AAPL
 python fds.py --list income            # discover endpoints
 python fds.py --describe /prices       # see an endpoint's parameters

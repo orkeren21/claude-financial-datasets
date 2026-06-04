@@ -21,8 +21,9 @@ Direct access to the [Financial Datasets API](https://docs.financialdatasets.ai)
 Everything goes through one script — `scripts/fds.py` — which handles auth,
 retries, and concurrent batches. No third-party packages are required.
 
-Paths below are relative to this skill's directory. If your shell is elsewhere,
-use the absolute path to `scripts/fds.py` (the directory holding this SKILL.md).
+Run the commands below from the skill's own directory (the folder holding this
+SKILL.md) — that's why they say `scripts/fds.py`. If your shell is elsewhere,
+either `cd` to that directory first or use the absolute path to `scripts/fds.py`.
 
 ## First: make sure a key is configured
 
@@ -44,16 +45,16 @@ their key if you don't have it; never write a key into a repo or echo it back.
 **Single GET** — every endpoint parameter is just a `--flag`:
 
 ```
-python fds.py /prices/snapshot --ticker AAPL
-python fds.py /financials/income-statements --ticker MSFT --period annual --limit 4
-python fds.py /prices --ticker NVDA --interval day --start_date 2024-01-01 --end_date 2024-03-31
+python scripts/fds.py /prices/snapshot --ticker AAPL
+python scripts/fds.py /financials/income-statements --ticker MSFT --period annual --limit 4
+python scripts/fds.py /prices --ticker NVDA --interval day --start_date 2024-01-01 --end_date 2024-03-31
 ```
 
 **POST endpoints** (`/financials/search/screener`, `/financials/search/line-items`)
 take a JSON body; the method is auto-detected:
 
 ```
-python fds.py /financials/search/screener --json '{"limit":10,"filters":[{"field":"revenue","operator":"gt","value":100000000000}]}'
+python scripts/fds.py /financials/search/screener --json '{"limit":10,"filters":[{"field":"revenue","operator":"gt","value":100000000000}]}'
 ```
 
 Each call prints `{"ok": ..., "status": ..., "data" | "error": ...}`. On failure
@@ -70,7 +71,7 @@ echo '[
   {"path":"/financials/income-statements","params":{"ticker":"MSFT","period":"annual","limit":3},"label":"MSFT"},
   {"path":"/financials/income-statements","params":{"ticker":"GOOGL","period":"annual","limit":3},"label":"GOOGL"},
   {"path":"/financials/income-statements","params":{"ticker":"AMZN","period":"annual","limit":3},"label":"AMZN"}
-]' | python fds.py --batch - --concurrency 5
+]' | python scripts/fds.py --batch - --concurrency 5
 ```
 
 Output is an array of results in input order, each tagged with its `label`.
@@ -112,8 +113,8 @@ institutional holdings, index funds, macro interest rates, line-item search, the
 `/tickers` and `/types` helper lists — discover them on demand (one call, only when
 needed):
 
-- `python fds.py --list <substring>` — list matching endpoint paths.
-- `python fds.py --describe /some/path` — show an endpoint's exact parameters
+- `python scripts/fds.py --list <substring>` — list matching endpoint paths.
+- `python scripts/fds.py --describe /some/path` — show an endpoint's exact parameters
   (authoritative; also use this if a cheat-sheet call ever returns a parameter error).
 - `references/endpoints.md` — the full catalog of all 49 endpoints with a table of
   contents, if you want to browse.
