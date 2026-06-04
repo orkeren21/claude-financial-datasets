@@ -19,3 +19,9 @@ venv/
 
 # Skill-creator eval workspace (local test runs)
 *-workspace/
+
+# Local-only docs (kept on disk, not published).
+# The OpenAPI spec (docs/fds-openapi.json) stays tracked as the source of truth;
+# only the internal design notes and the maintenance generator are ignored.
+docs/*-design.md
+docs/gen_endpoints.py
