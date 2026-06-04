@@ -12,13 +12,12 @@ Claude **fan out many requests in parallel** and post-process the JSON freely.
 ## Install
 
 ```
-/plugin marketplace add <github-user>/financial-datasets-skill
+/plugin marketplace add orkeren21/claude-financial-datasets
 /plugin install financial-datasets
 ```
 
-This works the same in Claude Code and Claude Desktop. (Until it's published to
-GitHub you can add it from a local checkout with
-`/plugin marketplace add /path/to/financial-datasets-skill`.)
+This works the same in Claude Code and Claude Desktop. (You can also add it from a
+local checkout for development: `/plugin marketplace add /path/to/this/repo`.)
 
 ## Set up your API key (once)
 

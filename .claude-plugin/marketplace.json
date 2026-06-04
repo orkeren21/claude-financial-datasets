@@ -1,12 +1,12 @@
 {
-  "name": "financial-datasets-skill",
+  "name": "claude-financial-datasets",
   "owner": {
     "name": "Or Keren"
   },
   "plugins": [
     {
       "name": "financial-datasets",
-      "description": "Call the Financial Datasets API directly — stock prices, company fundamentals, SEC filings, earnings, insider trades, 13F holdings, KPIs, macro rates, and a financial screener — with parallel batch calls and a one-time key setup.",
+      "description": "Call the Financial Datasets API directly \u2014 stock prices, company fundamentals, SEC filings, earnings, insider trades, 13F holdings, KPIs, macro rates, and a financial screener \u2014 with parallel batch calls and a one-time key setup.",
       "source": "./plugins/financial-datasets"
     }
   ]
