@@ -41,6 +41,9 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from _auth import require_api_key, MissingKeyError  # noqa: E402
 
 BASE_URL = "https://api.financialdatasets.ai"
+# The API's CDN rejects the default "Python-urllib" agent with a 403, so we
+# always send an explicit User-Agent.
+USER_AGENT = "financial-datasets-skill/0.1 (+https://github.com/financial-datasets-skill)"
 SPEC_PATH = Path(__file__).with_name("openapi.json")
 # Endpoints that are POST even if the bundled spec is missing.
 POST_PATHS = {"/financials/search/screener", "/financials/search/line-items"}
@@ -109,7 +112,7 @@ def call(path, params=None, method=None, key=None, base=BASE_URL,
     except MissingKeyError as exc:
         return {"ok": False, "status": None, "path": path, "error": str(exc)}
 
-    headers = {"X-API-KEY": key, "Accept": "application/json"}
+    headers = {"X-API-KEY": key, "Accept": "application/json", "User-Agent": USER_AGENT}
     url = base.rstrip("/") + path
     data = None
 
