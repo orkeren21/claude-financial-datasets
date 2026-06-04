@@ -53,7 +53,7 @@ python fds.py /prices --ticker NVDA --interval day --start_date 2024-01-01 --end
 take a JSON body; the method is auto-detected:
 
 ```
-python fds.py /financials/search/screener --json '{"period":"ttm","limit":10,"filters":[{"field":"revenue","operator":"gt","value":100000000000}]}'
+python fds.py /financials/search/screener --json '{"limit":10,"filters":[{"field":"revenue","operator":"gt","value":100000000000}]}'
 ```
 
 Each call prints `{"ok": ..., "status": ..., "data" | "error": ...}`. On failure
@@ -77,15 +77,46 @@ Output is an array of results in input order, each tagged with its `label`.
 Reach for batch mode for peer comparisons, portfolio sweeps, and any
 "compare/across/each of these" request.
 
-## Discovering the surface
+## Common endpoints (use these directly — no lookup needed)
 
-There are 49 endpoints. Don't guess — look them up:
+These cover almost every real request. The path and key parameters are here so you
+can call straight away instead of spending a round-trip on discovery.
+
+| Want | Path | Method | Key parameters |
+|------|------|--------|----------------|
+| Current price | `/prices/snapshot` | GET | `ticker`* |
+| Price history (EOD) | `/prices` | GET | `ticker`* · `interval`* (`day`\|`week`\|`month`\|`year`) · `start_date`* · `end_date`* |
+| Income statement | `/financials/income-statements` | GET | `ticker`*† · `period`* · `limit` |
+| Balance sheet | `/financials/balance-sheets` | GET | `ticker`*† · `period`* · `limit` |
+| Cash flow statement | `/financials/cash-flow-statements` | GET | `ticker`*† · `period`* · `limit` |
+| Ratios & metrics (incl. `net_margin`, P/E, ROE, etc.) | `/financial-metrics` | GET | `ticker`*† · `period`* · `limit` |
+| Current metrics snapshot | `/financial-metrics/snapshot` | GET | `ticker`*† |
+| Insider trades (Form 4, newest first) | `/insider-trades` | GET | `ticker`* · `limit` |
+| SEC filings | `/filings` | GET | `ticker`*† · `filing_type` (e.g. `10-K`, `10-Q`, `8-K`) · `limit` |
+| Earnings | `/earnings` | GET | `ticker`* · `limit` |
+| News | `/news` | GET | `ticker` · `limit` |
+| Company facts | `/company/facts` | GET | `ticker`*† |
+| Screen/filter stocks | `/financials/search/screener` | POST | body: `filters`* `[{field, operator, value}]` · `limit` |
+
+`*` = required · `†` = supply `ticker` **or** `cik`. `period` is `annual` \| `quarterly`
+\| `ttm`. The financials/metrics endpoints also accept date filters
+`report_period`, `report_period_gte`, `report_period_lte`, `report_period_gt`,
+`report_period_lt` (YYYY-MM-DD). Screener `operator` is one of
+`gt`/`lt`/`gte`/`lte`/`eq`/`in`. Prefer `/financial-metrics` (which returns
+`net_margin`, etc., pre-computed) over recomputing ratios from raw statements.
+
+## Anything else (the long tail)
+
+For endpoints not in the table above — segmented or as-reported financials, KPIs,
+institutional holdings, index funds, macro interest rates, line-item search, the
+`/tickers` and `/types` helper lists — discover them on demand (one call, only when
+needed):
 
 - `python fds.py --list <substring>` — list matching endpoint paths.
-- `python fds.py --describe /some/path` — show an endpoint's exact parameters.
-- `references/endpoints.md` — the full catalog (all endpoints, parameters, and
-  examples), grouped by category with a table of contents. Read it when you need
-  a parameter you don't know or want to confirm a path.
+- `python fds.py --describe /some/path` — show an endpoint's exact parameters
+  (authoritative; also use this if a cheat-sheet call ever returns a parameter error).
+- `references/endpoints.md` — the full catalog of all 49 endpoints with a table of
+  contents, if you want to browse.
 
 ## Spend the credit deliberately
 

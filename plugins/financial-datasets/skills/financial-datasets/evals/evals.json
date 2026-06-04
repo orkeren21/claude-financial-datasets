@@ -1,0 +1,44 @@
+{
+  "skill_name": "financial-datasets",
+  "evals": [
+    {
+      "id": 0,
+      "name": "single-company-fundamentals",
+      "prompt": "What was Apple's revenue and net income in its most recent fiscal year, and what is the stock trading at right now?",
+      "expected_output": "Real figures from the API: Apple's latest annual revenue and net income (with the fiscal year/period stated) plus the current/last price. Numbers should match what the API returns, not be fabricated.",
+      "files": [],
+      "assertions": [
+        "Reports Apple's latest annual revenue (~$416B)",
+        "Reports Apple's latest net income (~$112B)",
+        "Reports the current/last stock price (~$312)",
+        "States the fiscal year/period (FY2025)"
+      ]
+    },
+    {
+      "id": 1,
+      "name": "multi-ticker-margin-comparison",
+      "prompt": "Compare the net profit margin of Microsoft, Google, and Amazon over their last 3 fiscal years. Put it in a table.",
+      "expected_output": "A table with the three companies and three fiscal years of net profit margin each (net income / revenue, as a %). Data pulled from the API for all three tickers; ideally fetched in parallel.",
+      "files": [],
+      "assertions": [
+        "Covers all three companies (Microsoft, Google/Alphabet, Amazon)",
+        "Shows three fiscal years (2023, 2024, 2025)",
+        "Presented as a markdown table",
+        "Net margins are plausible (MSFT ~36%, AMZN ~10%)"
+      ]
+    },
+    {
+      "id": 2,
+      "name": "insider-trades-and-filing",
+      "prompt": "Show me the most recent insider trades for NVIDIA and find their latest 10-K filing.",
+      "expected_output": "A list of NVIDIA's most recent insider trades (names/roles, buy/sell, shares, dates) from the insider-trades endpoint, plus the latest 10-K from the filings endpoint (with date and a link/URL if available).",
+      "files": [],
+      "assertions": [
+        "Lists recent NVIDIA insider trades with a named insider",
+        "Identifies the latest 10-K (filed 2026-02-25 / FY end 2026-01-25)",
+        "Includes a filing reference (accession or SEC link)",
+        "Uses live API data (recent 2026 transaction dates present)"
+      ]
+    }
+  ]
+}
