@@ -23,7 +23,18 @@ Do this:
    the file at 0600 perms), then makes one verification call to confirm the key
    works.
 
-3. Report the result. If verification succeeded, tell the user they're ready and
-   that the key now works across Claude Code, Claude Desktop, and Cowork. If it
-   failed with an auth error, the key is wrong — ask them to double-check it. If
-   it failed with a payment error, their credit is exhausted.
+   **In a sandbox like Cowork** that can't read the user's home directory, add
+   `--local` so the key is written to the mounted project folder instead:
+
+   ```
+   python <financial-datasets skill dir>/scripts/setup_key.py "THE_KEY" --local
+   ```
+
+   That writes `./.fds_key` (or `$FDS_KEY_FILE` if set) at 0600 and adds it to
+   `.gitignore`. The same `fds.py` calls then read it back automatically.
+
+3. Report the result. If verification succeeded, tell the user they're ready —
+   the default setup makes the key work in Claude Code and Claude Desktop, while
+   `--local` makes it work in the current sandbox such as Cowork. If it failed
+   with an auth error, the key is wrong — ask them to double-check it. If it
+   failed with a payment error, their credit is exhausted.

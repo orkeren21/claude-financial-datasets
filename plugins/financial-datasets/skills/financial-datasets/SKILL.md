@@ -27,18 +27,31 @@ either `cd` to that directory first or use the absolute path to `scripts/fds.py`
 
 ## First: make sure a key is configured
 
-The API is keyed and metered. `fds.py` finds the key automatically from (in
-order) the `FINANCIAL_DATASETS_API_KEY` env var, `~/.claude/settings.json`'s
-`env` block, or `~/.financial-datasets/config.json`. If a call comes back with
-an error about a missing key, run setup once and continue:
+The API is keyed and metered. `fds.py` finds the key automatically from the first
+of these that is set: the `FINANCIAL_DATASETS_API_KEY` env var, a file named in
+`$FDS_KEY_FILE`, a `.fds_key` file in the working directory or any parent,
+`~/.claude/settings.json`'s `env` block, or `~/.financial-datasets/config.json`.
+If a call comes back with an error about a missing key, run setup once and
+continue:
 
 ```
 python scripts/setup_key.py "THE_USERS_KEY"
 ```
 
-This stores the key in `~/.claude/settings.json` (which Claude Code, Claude
-Desktop, and Cowork all read) and verifies it with a test call. Ask the user for
-their key if you don't have it; never write a key into a repo or echo it back.
+This stores the key in `~/.claude/settings.json` (which Claude Code and Claude
+Desktop read) and verifies it with a test call.
+
+**In a sandbox like Cowork** that can't reach the home directory, store the key in
+the mounted project folder instead — `fds.py` reads it back via the `.fds_key`
+lookup:
+
+```
+python scripts/setup_key.py "THE_USERS_KEY" --local
+```
+
+That writes `./.fds_key` (or `$FDS_KEY_FILE` if set), keeps it at 0600, and adds it
+to `.gitignore`. Ask the user for their key if you don't have it; never write a key
+into a repo or echo it back.
 
 ## Making calls
 
