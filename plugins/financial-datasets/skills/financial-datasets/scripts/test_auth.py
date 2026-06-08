@@ -13,6 +13,7 @@ from unittest import mock
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _auth        # noqa: E402
+import setup_key    # noqa: E402
 
 
 class ResolveKeyTest(unittest.TestCase):
@@ -91,6 +92,50 @@ class ResolveKeyTest(unittest.TestCase):
     def test_missing_everything_raises(self):
         with self.assertRaises(_auth.MissingKeyError):
             _auth.require_api_key()
+
+
+class SetupLocalTest(unittest.TestCase):
+    def setUp(self):
+        self._cwd_tmp = TemporaryDirectory()
+        self._origin = os.getcwd()
+        os.chdir(self._cwd_tmp.name)
+        self._env = mock.patch.dict(os.environ, {}, clear=True)
+        self._env.start()
+
+    def tearDown(self):
+        self._env.stop()
+        os.chdir(self._origin)
+        self._cwd_tmp.cleanup()
+
+    def test_local_target_defaults_to_cwd(self):
+        self.assertEqual(setup_key._local_target(),
+                         (Path.cwd() / _auth.KEY_FILENAME).resolve())
+
+    def test_local_target_honors_env(self):
+        os.environ[_auth.KEY_FILE_ENV] = "custom_key_file"
+        self.assertEqual(setup_key._local_target(),
+                         (Path.cwd() / "custom_key_file").resolve())
+
+    def test_store_key_local_writes_file_and_gitignore(self):
+        path = setup_key.store_key_local("secret-key")
+        self.assertEqual(Path(path).read_text().strip(), "secret-key")
+        self.assertEqual(oct(Path(path).stat().st_mode & 0o777), "0o600")
+        gitignore = Path(path).parent / ".gitignore"
+        self.assertIn(".fds_key", gitignore.read_text().splitlines())
+
+    def test_ensure_gitignored_appends_to_existing(self):
+        gitignore = Path.cwd() / ".gitignore"
+        gitignore.write_text("node_modules\n")
+        setup_key._ensure_gitignored(Path.cwd() / _auth.KEY_FILENAME)
+        lines = gitignore.read_text().splitlines()
+        self.assertIn("node_modules", lines)
+        self.assertIn(".fds_key", lines)
+
+    def test_ensure_gitignored_idempotent(self):
+        gitignore = Path.cwd() / ".gitignore"
+        gitignore.write_text(".fds_key\n")
+        setup_key._ensure_gitignored(Path.cwd() / _auth.KEY_FILENAME)
+        self.assertEqual(gitignore.read_text().count(".fds_key"), 1)
 
 
 if __name__ == "__main__":
