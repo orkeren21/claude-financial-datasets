@@ -28,13 +28,21 @@ Get a key at <https://www.financialdatasets.ai/>, then:
 ```
 
 The key is stored in your `~/.claude/settings.json` `env` block — a file that
-Claude Code, Claude Desktop, and Cowork all read — and verified with a test
-call. **The key is never committed to this repo**; the skill ships no secret.
+Claude Code and Claude Desktop read — and verified with a test call. **The key is
+never committed to this repo**; the skill ships no secret.
 
-Key resolution order used by the skill:
+Key resolution order used by the skill (first match wins):
 1. `FINANCIAL_DATASETS_API_KEY` environment variable
-2. `~/.claude/settings.json` → `env.FINANCIAL_DATASETS_API_KEY`
-3. `~/.financial-datasets/config.json` → `{"api_key": "..."}`
+2. `$FDS_KEY_FILE` → a file whose contents are the key
+3. `.fds_key` in the working directory or any parent directory
+4. `~/.claude/settings.json` → `env.FINANCIAL_DATASETS_API_KEY`
+5. `~/.financial-datasets/config.json` → `{"api_key": "..."}`
+
+**Sandboxed environments (Cowork).** A sandbox that can't reach your home
+directory can't use the `~/.claude/settings.json` or `~/.financial-datasets`
+sources. Store the key in the mounted project folder instead with
+`python .../setup_key.py YOUR_KEY --local`, which writes a git-ignored `.fds_key`
+(source 3).
 
 ## Use
 

@@ -1,6 +1,8 @@
 # Never commit secrets or local key stores
 .env
 *.env
+.fds_key
+**/.fds_key
 config.json
 **/config.json
 .financial-datasets/
